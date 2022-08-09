@@ -5,10 +5,12 @@ import {isValidTime} from './helpers/timeValidator';
 
 function App() {
   const [userID, setUserID] = useState('');
-  const [fName, setfName] = useState('');
-  const [LName, setLName] = useState('');
   const [newUser, setNewUser] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+	const [user, setUser] = useState<{fName: string, lName: string}>({
+		fName: '',
+		lName: ''
+	});
 
   useEffect(() => {
     if(!localStorage.getItem('EmployeeDB')) {
@@ -17,15 +19,12 @@ function App() {
     }
   },[]);
 
-	const handleFirstName = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    setfName(event.target.value);
-  }
-    
-  const handleLastName = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    setLName(event.target.value);
-  }
+	const handleNameChange = (firstOrLast: string, event: React.ChangeEvent<HTMLInputElement>) => {
+		event.preventDefault();
+		if(firstOrLast === 'first') setUser({...user, fName: event.target.value})
+		else setUser({...user, lName: event.target.value}) 
+		console.log(user)
+	}
 
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
@@ -99,9 +98,10 @@ function App() {
   }
 	
   const handleNewUserAdd = () => {
-    let firstName = fName;
-    let lastName = LName;
+    let firstName = user.fName;
+		let lastName = user.lName;
     let newUser: Admin | User;
+		
     if(isAdmin) newUser = new Admin(firstName, lastName);
     else {
       newUser = new User(firstName, lastName);
@@ -111,8 +111,10 @@ function App() {
     window.alert(`Your User ID is ${newUser.id}`);
     localStorage.setItem('EmployeeDB', JSON.stringify(obj));
     setNewUser(!newUser);
-    setfName('');
-    setLName('');
+		setUser({
+			fName: '',
+			lName: ''
+		})
     setIsAdmin(false);
   }
 
@@ -246,9 +248,9 @@ function App() {
       </div>
       <div id="new user div" className={`${newUser ? 'flex flex-col' : 'hidden'}`}>
         <label className="text-lg m-2">First Name</label>
-        <input id='fNField' onChange={(event) => handleFirstName(event)} className="text-lg mx-3 w-38" placeholder="Enter First name" value={fName}/>
+        <input id='fNField' onChange={(event) => handleNameChange('first', event)} className="text-lg mx-3 w-38" placeholder="Enter First name" value={user.fName}/>
         <label className="text-lg m-2">Last Name</label>
-        <input id='lNField' onChange={(event) => handleLastName(event)} className="text-lg mx-3 w-38" placeholder="Enter Last name" value={LName}/>
+        <input id='lNField' onChange={(event) => handleNameChange('last', event)} className="text-lg mx-3 w-38" placeholder="Enter Last name" value={user.lName}/>
         <div className='block ml-2 mt-2'>
           <label className="inline-flex justify-center">
             <input type="checkbox" onChange={() => setIsAdmin(!isAdmin)}/>
